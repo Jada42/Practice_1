@@ -1,0 +1,63 @@
+##### Somehow I get this error:
+
+##### **r in Math.data.frame(list(Days_of_observation = c(36, 37, 38, 39,  :  non-numeric-alike variable(s) in data frame: Days_of_observation**
+
+##### This is the code and list I performed:
+##### First the package and list:
+
+install.packages("mgm")
+
+
+
+df_list_copy <- structure(list(`Survey Creation Date` = c("2/6/2018 14:33", "2/6/2018 16:20", 
+                                      "2/6/2018 18:54", "2/6/2018 20:08", "2/6/2018 22:29", "2/7/2018 8:43", 
+                                      "2/7/2018 10:52", "2/7/2018 12:21", "2/7/2018 14:56", "2/7/2018 16:20", 
+                                      "2/7/2018 18:27", "2/7/2018 20:11", "2/7/2018 22:15", "2/8/2018 8:34", 
+                                      "2/8/2018 10:36", "2/8/2018 12:34", "2/8/2018 14:28", "2/8/2018 16:44", 
+                                      "2/8/2018 18:41", "2/8/2018 20:24"), `Survey Completion Date` = c("2/6/2018 14:56", 
+                                                                                                        "2/6/2018 16:22", "2/6/2018 18:58", "2/6/2018 20:22", "2/6/2018 22:46", 
+                                                                                                        "2/7/2018 8:44", "2/7/2018 11:23", "2/7/2018 12:26", "2/7/2018 14:58", 
+                                                                                                        "2/7/2018 16:21", "2/7/2018 19:55", "2/7/2018 20:13", "2/7/2018 22:16", 
+                                                                                                        "2/8/2018 9:41", "2/8/2018 11:05", "2/8/2018 12:54", "2/8/2018 14:31", 
+                                                                                                        NA, "2/8/2018 19:52", "2/8/2018 20:41"), `Since your last survey; how many alcoholic drinks have you had?` = c(0, 
+                                                                                                                                                                                                                       3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, NA, 2, 5), `I feel comfortable in my current location` = c(88, 
+                                                                                                                                                                                                                                                                                                                                  81, 88, 89, 95, 94, 62, 82, 63, 80, 79, 81, 95, 100, 88, 83, 
+                                                                                                                                                                                                                                                                                                                                  50, NA, 72, 61), `I feel stressed` = c(10, 12, 69, 34, 16, 6, 
+                                                                                                                                                                                                                                                                                                                                                                         27, 35, 56, 28, 58, 20, 32, 10, 26, 43, 44, NA, 57, 48), `I feel down/depressed` = c(14, 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                              18, 15, 18, 5, 2, 8, 4, 0, 11, 13, 10, 4, 6, 2, 7, 0, NA, 0, 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                              0)), row.names = c(NA, -20L), class = c("tbl_df", "tbl", "data.frame"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                              ))
+##### This is the splitting of the time_date into dayno and beep (number of observations on one day)
+
+##### Create time date table with n of observations per day and days of observation since 2018-01-01
+
+time_date <- df_list_copy %>%
+  mutate(Date = as.Date(`Survey Creation Date`, format = "%m/%d/%Y %H:%M")) %>%
+  group_by(Date) %>%
+  count() %>%
+  mutate(Days_of_observation = Date - as.Date("2018-01-01"))
+
+#####
+
+Beep <- time_date[2]
+Dayno <- time_date[3]
+
+#####
+
+bwSeq <- seq(0.01, 1, length = 10)
+
+##### This is where I receive the error
+
+set.seed(1)
+bw_object <- bwSelect(data = df_list_copy,
+                      type = rep("g", 12),
+                      level = rep(1, 12),
+                      bwSeq = bwSeq,
+                      bwFolds = 1,
+                      bwFoldsize = 10,
+                      modeltype = "mvar",
+                      lags = 1,
+                      scale = TRUE,
+                      beepvar = Beep,
+                      dayvar = Dayno,
+                      pbar = TRUE)
